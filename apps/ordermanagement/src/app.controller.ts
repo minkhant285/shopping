@@ -1,25 +1,58 @@
-import { Controller, Get, Inject } from '@nestjs/common';
-import { ClientProxy, EventPattern } from '@nestjs/microservices';
+import {
+    Body,
+    Controller,
+    Get,
+    Inject,
+    Param,
+    Post,
+    Put,
+} from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
+import { OrderInput, OMResponse } from 'apps/models';
+import { Observable } from 'rxjs';
 import { AppService } from './app.service';
 
-@Controller()
+@Controller('orders')
 export class AppController {
-  constructor(
-    private readonly appService: AppService,
-    @Inject('ORDER_SERVICE') private orderClient: ClientProxy,
-    @Inject('PAYMENT_SERVICE') private paymentClient: ClientProxy,
-  ) {}
+    constructor(
+        private readonly appService: AppService,
+        @Inject('ORDER_SERVICE') private orderClient: ClientProxy,
+        @Inject('PAYMENT_SERVICE') private paymentClient: ClientProxy,
+    ) {}
 
-  @Get()
-  getHello(): string {
-    this.orderClient.emit('create_order', 'new order');
-    this.paymentClient.emit('order_created', 'created');
-    return this.appService.getHello();
-  }
+    // @Get()
+    // getHello(): string {
+    //     this.orderClient.emit('test_gateway', 'testing');
+    //     this.paymentClient.emit('payment_created', 'created');
+    //     return this.appService.getHello();
+    // }
 
-  // @EventPattern('order_created')
-  // orderCreate(data: string) {
-  //   this.client.emit('order_created', 'created');
-  //   console.log(`Order Created: ${data}`);
-  // }
+    @Get()
+    orders(): Observable<OMResponse> {
+        return this.orderClient.send('get_all_orders', '').pipe((res) => res);
+    }
+
+    @Get(':id')
+    getOrderByID(@Param('id') id: string): Observable<OMResponse> {
+        return this.orderClient.send('order_by_id', id).pipe((res) => res);
+    }
+
+    @Get('status/:id')
+    checkOrderStatus(@Param('id') id: string): Observable<OMResponse> {
+        return this.orderClient
+            .send('check_order_status', id)
+            .pipe((res) => res);
+    }
+
+    @Post('create')
+    createOrder(@Body() orderBody: OrderInput): Observable<OMResponse> {
+        return this.orderClient
+            .send('create_order', orderBody)
+            .pipe((res) => res);
+    }
+
+    @Put('cancel/:id')
+    cancelOrder(@Param('id') id: string): Observable<OMResponse> {
+        return this.orderClient.send('cancel_order', id).pipe((res) => res);
+    }
 }

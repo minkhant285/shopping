@@ -1,11 +1,11 @@
 export interface OrderInput {
-    productID: string;
+    product_id: string;
     quantity: number;
-    customerID: string;
+    customer_id: string;
     price: number;
     status?: string;
 }
 
 export interface OrderType extends OrderInput {
-    orderID: string;
+    order_id: string;
 }
