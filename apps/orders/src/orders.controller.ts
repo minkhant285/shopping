@@ -20,112 +20,48 @@ export class OrdersController {
     @Get()
     @MessagePattern('get_all_orders')
     async orders(): Promise<OMResponse> {
-        let result: OMResponse;
         const returnData = await this.orderService.getOrders();
-
-        if (returnData) {
-            result = {
-                status: HttpStatus.OK,
-                message: 'Get_all_orders_success',
-                data: returnData,
-            };
-        } else {
-            result = {
-                status: HttpStatus.INTERNAL_SERVER_ERROR,
-                message: 'Get_all_orders_fail',
-                data: null,
-            };
-        }
-        return result;
+        console.log(returnData);
+        return await this.responseToGateWay(returnData);
     }
 
     @MessagePattern('order_by_id')
     async orderById(id: string): Promise<OMResponse> {
-        let result: OMResponse;
         const returnData = await this.orderService.getOrderByID(id);
+        return await this.responseToGateWay(returnData);
+    }
 
-        if (returnData) {
-            result = {
-                status: HttpStatus.OK,
-                message: 'Get_order_with_id_success',
-                data: returnData,
-            };
-        } else {
-            result = {
-                status: HttpStatus.INTERNAL_SERVER_ERROR,
-                message: 'Get_order_with_id_fail',
-                data: null,
-            };
-        }
-        return result;
+    @MessagePattern('orders_by_customer_id')
+    async orderByCId(id: string): Promise<OMResponse> {
+        return await this.responseToGateWay(
+            await this.orderService.getOrderByCustomerID(id),
+        );
     }
 
     // @Get('status/:id')
     @MessagePattern('check_order_status')
     async checkOrderStatus(id: string): Promise<OMResponse> {
-        let result: OMResponse;
         const returnData = await this.orderService.getOrderStatus(id);
-        if (returnData) {
-            result = {
-                status: HttpStatus.OK,
-                message: 'Check_stauts_success',
-                data: returnData,
-            };
-        } else {
-            result = {
-                status: HttpStatus.INTERNAL_SERVER_ERROR,
-                message: 'Check_status_fail',
-                data: null,
-            };
-        }
-        return result;
+        return await this.responseToGateWay(returnData);
     }
 
     // @Post('create')
     @MessagePattern('create_order')
     async createOrder(orderBody: OrderInput): Promise<OMResponse> {
-        orderBody['order_id'] = uuidv4();
+        // orderBody['order_id'] = uuidv4();
         orderBody['status'] = OrderStatus.Create;
-        let result: OMResponse;
         const returnData = await this.orderService.createOrder(orderBody);
-        if (returnData) {
-            result = {
-                status: HttpStatus.OK,
-                message: 'create_order_success',
-                data: returnData,
-            };
-        } else {
-            result = {
-                status: HttpStatus.INTERNAL_SERVER_ERROR,
-                message: 'create_order_fail',
-                data: null,
-            };
-        }
-        return result;
+        return await this.responseToGateWay(returnData);
     }
 
     // @Put('cancel/:id')
     @MessagePattern('cancel_order')
     async cancelOrder(id: string): Promise<OMResponse> {
-        let result: OMResponse;
         const returnData = await this.orderService.controlOrderStatus(
             id,
             OrderStatus.Cancel,
         );
-        if (returnData) {
-            result = {
-                status: HttpStatus.OK,
-                message: 'Check_stauts_success',
-                data: returnData,
-            };
-        } else {
-            result = {
-                status: HttpStatus.INTERNAL_SERVER_ERROR,
-                message: 'Check_status_fail',
-                data: null,
-            };
-        }
-        return result;
+        return await this.responseToGateWay(returnData);
     }
 
     @MessagePattern('test_gateway')
@@ -158,5 +94,23 @@ export class OrdersController {
             OrderStatus.Deliver,
         );
         console.log(`Your product is delivered `);
+    }
+
+    async responseToGateWay(dataArg: any): Promise<OMResponse> {
+        let result: OMResponse;
+        if (dataArg) {
+            result = {
+                status: HttpStatus.OK,
+                message: 'Success',
+                data: dataArg,
+            };
+        } else {
+            result = {
+                status: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: 'Fail',
+                data: null,
+            };
+        }
+        return result;
     }
 }

@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { MicroserviceNames, OrderEntity } from 'apps/models';
+import { MicroserviceNames, OrderEntity, ProductsEntity } from 'apps/models';
 import { OrdersController } from './orders.controller';
 import { OrdersService } from './orders.service';
 
@@ -32,7 +32,7 @@ import { OrdersService } from './orders.service';
             autoLoadEntities: true,
             synchronize: true,
         }),
-        TypeOrmModule.forFeature([OrderEntity]),
+        TypeOrmModule.forFeature([OrderEntity, ProductsEntity]),
     ],
     controllers: [OrdersController],
     providers: [OrdersService],

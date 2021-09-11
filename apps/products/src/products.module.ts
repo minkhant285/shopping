@@ -1,10 +1,40 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { MicroserviceNames, OrderEntity, ProductsEntity } from 'apps/models';
 import { ProductsController } from './products.controller';
 import { ProductsService } from './products.service';
 
 @Module({
-  imports: [],
-  controllers: [ProductsController],
-  providers: [ProductsService],
+    imports: [
+        ConfigModule.forRoot({
+            envFilePath: '.env',
+            isGlobal: true,
+        }),
+        ClientsModule.register([
+            {
+                name: MicroserviceNames.ProductService,
+                transport: Transport.TCP,
+                // options: {
+                //     port:
+                //         parseInt(<string>process.env.PAYMENT_APP_PORT) || 4002,
+                // },
+            },
+        ]),
+        TypeOrmModule.forRoot({
+            type: 'postgres',
+            host: process.env.POSTGRES_HOST,
+            port: parseInt(<string>process.env.POSTGRES_PORT),
+            database: process.env.POSTGRES_DATABASE,
+            username: process.env.POSTGRES_USERNAME,
+            password: process.env.POSTGRES_PASSWORD,
+            autoLoadEntities: true,
+            synchronize: true,
+        }),
+        TypeOrmModule.forFeature([ProductsEntity, OrderEntity]),
+    ],
+    controllers: [ProductsController],
+    providers: [ProductsService],
 })
 export class ProductsModule {}

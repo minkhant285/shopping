@@ -4,6 +4,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { MicroserviceNames } from 'apps/models';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ProductsController } from './products.controller';
 
 @Module({
     imports: [
@@ -27,12 +28,24 @@ import { AppService } from './app.service';
                 transport: Transport.TCP,
                 options: {
                     port:
-                        parseInt(<string>process.env.PAYMENT_APP_PORT) || 4002,
+                        parseInt(
+                            <string>process.env.PAYMENT_MICROSERVICE_PORT,
+                        ) || 4100,
+                },
+            },
+            {
+                name: MicroserviceNames.ProductService,
+                transport: Transport.TCP,
+                options: {
+                    port:
+                        parseInt(
+                            <string>process.env.PRODUCTS_MICROSERVICE_PORT,
+                        ) || 4102,
                 },
             },
         ]),
     ],
-    controllers: [AppController],
+    controllers: [AppController, ProductsController],
     providers: [AppService],
 })
 export class AppModule {}

@@ -1,6 +1,7 @@
 import {
     Body,
     Controller,
+    Delete,
     Get,
     Inject,
     Param,
@@ -37,6 +38,13 @@ export class AppController {
         return this.orderClient.send('order_by_id', id).pipe((res) => res);
     }
 
+    @Get('customer/:id')
+    getOrderByCID(@Param('id') id: string): Observable<OMResponse> {
+        return this.orderClient
+            .send('orders_by_customer_id', id)
+            .pipe((res) => res);
+    }
+
     @Get('status/:id')
     checkOrderStatus(@Param('id') id: string): Observable<OMResponse> {
         return this.orderClient
@@ -51,7 +59,7 @@ export class AppController {
             .pipe((res) => res);
     }
 
-    @Put('cancel/:id')
+    @Delete('cancel/:id')
     cancelOrder(@Param('id') id: string): Observable<OMResponse> {
         return this.orderClient.send('cancel_order', id).pipe((res) => res);
     }
